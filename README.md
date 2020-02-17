@@ -1,21 +1,9 @@
 # Lambdex
 
-**TODO: Add description**
+This project is a playground where I'll explore some stuff related to lambda calculus while I'm attending [Recurse Center](https://recurse.com/).
 
-## Installation
+This is also related to the talk I'm going to give at [NYC Elixir Meetup](https://www.meetup.com/NYC-Elixir/events/268594764/) and [CodeBEAM SF](https://codesync.global/conferences/code-beam-sf/).
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `lambdex` to your list of dependencies in `mix.exs`:
+The talks are going to focus more on the representation of data using only functions and some of the basics of lambda calculus.
 
-```elixir
-def deps do
-  [
-    {:lambdex, "~> 0.1.0"}
-  ]
-end
-```
-
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at [https://hexdocs.pm/lambdex](https://hexdocs.pm/lambdex).
-
+I started by creating a simple language for representing lambda expressions just because typing `fn x -> ... end` for every lambda was too tyring, and typing `x. ...` or `x. (...)` is waaaay easier (and will fit on the screen when presenting).
