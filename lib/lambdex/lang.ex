@@ -28,6 +28,14 @@ defmodule Lambdex.Lang do
 
   @spec parse([token()]) :: ast()
   def parse(tokens) do
+    case parse_term({tokens, []}) do
+      {[], [ast]} ->
+        ast
+
+      {[:cp | _], _} ->
+        raise "Unexpected end due to unmatched closing parens"
+    end
+
     {tokens, []}
     |> parse_term()
     |> elem(1)
@@ -38,28 +46,20 @@ defmodule Lambdex.Lang do
 
   @spec parse_term(parse_ctx()) :: parse_ctx()
   def parse_term({[{:var, key} | tokens], asts}) do
-    {tokens, [{:var, key} | asts]}
+    parse_app({tokens, [{:var, key} | asts]})
   end
 
   def parse_term({[:op | tokens], ast}) do
-    {[:cp | tokens], ast} =
-      {tokens, ast}
-      |> parse_term()
-      |> parse_app()
-
-    {tokens, ast}
+    case parse_term({tokens, ast}) do
+      {[:cp | tokens], ast} -> parse_app({tokens, ast})
+      _ -> raise "Unexpected end due to unmatched open parens"
+    end
   end
 
   def parse_term({[{:lam, key} | tokens], asts}) do
-    {tokens, [body | asts]} =
-      {tokens, asts}
-      |> parse_term()
-      |> parse_app()
-
-    {tokens, [{:lam, key, body} | asts]}
+    {tokens, [body | asts]} = parse_term({tokens, asts})
+    parse_app({tokens, [{:lam, key, body} | asts]})
   end
-
-  def parse_term(ctx), do: ctx
 
   def parse_app({[], _} = ctx), do: ctx
 
@@ -69,6 +69,4 @@ defmodule Lambdex.Lang do
     {tokens, [arg | asts]} = parse_term({tokens, asts})
     {tokens, [{:app, fun, arg} | asts]}
   end
-
-  def parse_app(ctx), do: ctx
 end

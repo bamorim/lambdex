@@ -158,5 +158,17 @@ defmodule Lambdex.LangTest do
         assert ast == variation |> tokenize() |> parse()
       end
     end
+
+    test "unmatched open parentesis exception" do
+      assert_raise(RuntimeError, ~r/unmatched open parens/, fn ->
+        "a. (a" |> tokenize() |> parse()
+      end)
+    end
+
+    test "unmatched closing parentesis exception" do
+      assert_raise(RuntimeError, ~r/unmatched closing parens/, fn ->
+        "a. a)" |> tokenize() |> parse()
+      end)
+    end
   end
 end
