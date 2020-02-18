@@ -159,6 +159,19 @@ defmodule Lambdex.LangTest do
       end
     end
 
+    test "app should be left associative" do
+      ast = "a. b. a a b" |> tokenize() |> parse()
+
+      variations = [
+        "a. b. ((a a) b)",
+        "a. b. (a a) b"
+      ]
+
+      for variation <- variations do
+        assert ast == variation |> tokenize() |> parse()
+      end
+    end
+
     test "unmatched open parentesis exception" do
       assert_raise(RuntimeError, ~r/unmatched open parens/, fn ->
         "a. (a" |> tokenize() |> parse()

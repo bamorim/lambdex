@@ -1,4 +1,12 @@
 defmodule Lambdex.Lang do
+  defmacro defl(name, expr) do
+    fun = expr |> tokenize() |> parse() |> compile()
+
+    quote do
+      def unquote(name), do: unquote(fun)
+    end
+  end
+
   @type ast :: {:lam, atom(), ast()} | {:app, ast(), ast()} | {:var, atom()}
   @type token :: :op | :cp | {:lam, atom()} | {:var, atom()}
 
@@ -28,45 +36,78 @@ defmodule Lambdex.Lang do
 
   @spec parse([token()]) :: ast()
   def parse(tokens) do
-    case parse_term({tokens, []}) do
-      {[], [ast]} ->
-        ast
+    case parse_expr({tokens, [[]]}) do
+      {[], [term]} ->
+        to_ast(term)
 
-      {[:cp | _], _} ->
+      _ ->
         raise "Unexpected end due to unmatched closing parens"
     end
-
-    {tokens, []}
-    |> parse_term()
-    |> elem(1)
-    |> List.first()
   end
 
-  @type parse_ctx :: {[token()], [ast() | :start]}
+  defp to_ast({:var, key}), do: {:var, key}
+  defp to_ast({:lam, key, body}), do: {:lam, key, to_ast(body)}
+
+  defp to_ast(expr) when is_list(expr) do
+    expr
+    |> Enum.map(&to_ast/1)
+    |> Enum.reverse()
+    |> case do
+      [term] -> term
+      [term | tail] -> Enum.reduce(tail, term, &{:app, &2, &1})
+    end
+  end
+
+  @type parse_term :: {:var, atom()} | {:lam, atom(), [parse_term()]} | [parse_term()]
+  @type parse_ctx :: {[token()], [ast()]}
+
+  def parse_expr({tokens, [expr | stack]}) do
+    case parse_term({tokens, stack}) do
+      {[], [term | stack]} ->
+        {[], [[term | expr] | stack]}
+
+      {[:cp | tokens], [term | stack]} ->
+        {[:cp | tokens], [[term | expr] | stack]}
+
+      {tokens, [term | stack]} ->
+        parse_expr({tokens, [[term | expr] | stack]})
+    end
+  end
 
   @spec parse_term(parse_ctx()) :: parse_ctx()
-  def parse_term({[{:var, key} | tokens], asts}) do
-    parse_app({tokens, [{:var, key} | asts]})
+  def parse_term({[{:var, key} | tokens], stack}) do
+    {tokens, [{:var, key} | stack]}
   end
 
-  def parse_term({[:op | tokens], ast}) do
-    case parse_term({tokens, ast}) do
-      {[:cp | tokens], ast} -> parse_app({tokens, ast})
+  def parse_term({[:op | tokens], stack}) do
+    case parse_expr({tokens, [[] | stack]}) do
+      {[:cp | tokens], stack} -> {tokens, stack}
       _ -> raise "Unexpected end due to unmatched open parens"
     end
   end
 
-  def parse_term({[{:lam, key} | tokens], asts}) do
-    {tokens, [body | asts]} = parse_term({tokens, asts})
-    parse_app({tokens, [{:lam, key, body} | asts]})
+  def parse_term({[{:lam, key} | tokens], stack}) do
+    {tokens, [body | stack]} = parse_expr({tokens, [[] | stack]})
+    {tokens, [{:lam, key, body} | stack]}
   end
 
-  def parse_app({[], _} = ctx), do: ctx
+  @spec compile(ast()) :: Macro.t()
+  def compile(ast), do: do_compile(ast, MapSet.new())
 
-  def parse_app({[:cp | _], _} = ctx), do: ctx
+  @spec do_compile(ast(), MapSet.t()) :: Macro.t()
+  def do_compile({:lam, key, body}, vars) do
+    {:fn, [], [{:->, [], [[{key, [], Elixir}], do_compile(body, MapSet.put(vars, key))]}]}
+  end
 
-  def parse_app({tokens, [fun | asts]}) do
-    {tokens, [arg | asts]} = parse_term({tokens, asts})
-    {tokens, [{:app, fun, arg} | asts]}
+  def do_compile({:var, key}, vars) do
+    if MapSet.member?(vars, key) do
+      {key, [], Elixir}
+    else
+      {key, [], []}
+    end
+  end
+
+  def do_compile({:app, fun, arg}, vars) do
+    {{:., [], [do_compile(fun, vars)]}, [], [do_compile(arg, vars)]}
   end
 end
