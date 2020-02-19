@@ -1,6 +1,7 @@
 defmodule Lambdex.Lang do
   defmacro defl(name, expr) do
     fun = expr |> tokenize() |> parse() |> compile()
+    name = {:"#{name}!", [], Elixir}
 
     quote do
       def unquote(name), do: unquote(fun)
@@ -103,7 +104,7 @@ defmodule Lambdex.Lang do
     if MapSet.member?(vars, key) do
       {key, [], Elixir}
     else
-      {key, [], []}
+      {:"#{key}!", [], []}
     end
   end
 
