@@ -1,4 +1,7 @@
-defmodule Lambdex.Church.Bool do
+defmodule Lambdex.Bool do
+  @moduledoc """
+  Bool encoding (which is the same in either scott encoding and church encoding)
+  """
   import Lambdex.Lang
   defl(true, "t. f. t")
   defl(false, "t. f. f")

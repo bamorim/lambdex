@@ -1,6 +1,6 @@
-defmodule Lambdex.Church.Number do
+defmodule Lambdex.ChurchNumber do
   import Lambdex.Lang
-  import Lambdex.Church.Bool, only: [false!: 0, true!: 0]
+  import Lambdex.Bool, only: [false!: 0, true!: 0]
 
   defl(:zero, "f. x. x")
   defl(:succ, "n. f. x. f (n f x)")

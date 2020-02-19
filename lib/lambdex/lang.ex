@@ -1,7 +1,7 @@
 defmodule Lambdex.Lang do
   defmacro defl(name, expr) do
     fun = expr |> tokenize() |> parse() |> compile()
-    name = {:"#{name}!", [], Elixir}
+    name = func_ref(name)
 
     quote do
       def unquote(name), do: unquote(fun)
@@ -97,18 +97,34 @@ defmodule Lambdex.Lang do
 
   @spec do_compile(ast(), MapSet.t()) :: Macro.t()
   def do_compile({:lam, key, body}, vars) do
-    {:fn, [], [{:->, [], [[{key, [], Elixir}], do_compile(body, MapSet.put(vars, key))]}]}
-  end
+    vars = MapSet.put(vars, key)
 
-  def do_compile({:var, key}, vars) do
-    if MapSet.member?(vars, key) do
-      {key, [], Elixir}
-    else
-      {:"#{key}!", [], []}
+    quote do
+      fn unquote(ref(key, vars)) ->
+        unquote(do_compile(body, vars))
+      end
     end
   end
 
-  def do_compile({:app, fun, arg}, vars) do
-    {{:., [], [do_compile(fun, vars)]}, [], [do_compile(arg, vars)]}
+  def do_compile({:var, key}, vars) do
+    ref(key, vars)
   end
+
+  def do_compile({:app, fun, arg}, vars) do
+    quote do
+      unquote(do_compile(fun, vars)).(unquote(do_compile(arg, vars)))
+    end
+  end
+
+  defp ref(key, vars) do
+    if MapSet.member?(vars, key) do
+      arg_ref(key)
+    else
+      func_ref(key)
+    end
+  end
+
+  def arg_ref(key), do: {:"lambdex_arg_#{key}", [], Elixir}
+  def func_ref(nil), do: func_ref("nil")
+  def func_ref(key), do: {:"#{key}!", [], []}
 end

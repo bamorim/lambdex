@@ -1,8 +1,8 @@
-defmodule Lambdex.Church.FactorialTest do
+defmodule Lambdex.ChurchFactorialTest do
   use ExUnit.Case
 
-  alias Lambdex.Church.Number, as: N
-  alias Lambdex.Church.Factorial, as: F
+  alias Lambdex.ChurchNumber, as: N
+  alias Lambdex.ChurchFactorial, as: F
 
   test "it works" do
     assert 120 == 5 |> N.from_elixir() |> F.fact!().() |> N.to_elixir()
