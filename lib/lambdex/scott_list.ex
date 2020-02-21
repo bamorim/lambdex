@@ -1,14 +1,14 @@
 defmodule Lambdex.ScottList do
   import Lambdex.Lang
-  import Lambdex.Recursion, only: [z!: 0]
+  import Lambdex.Recursion, only: [z: 0]
 
-  defl(nil, "nil. cons. nil")
-  defl(:cons, "h. t. nil. cons. cons h t")
+  defl(:empty, "empty. cons. empty")
+  defl(:cons, "h. t. empty. cons. cons h t")
 
   defl(:map_h, """
     map. fun. l.
       l
-        nil
+        empty
         (h. t. cons (fun h) (map fun t))
   """)
 
@@ -26,6 +26,6 @@ defmodule Lambdex.ScottList do
   def from_elixir(list) when is_list(list) do
     list
     |> Enum.reverse()
-    |> Enum.reduce(nil!(), fn head, tail -> cons!().(head).(tail) end)
+    |> Enum.reduce(empty(), fn head, tail -> cons().(head).(tail) end)
   end
 end

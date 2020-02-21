@@ -8,13 +8,13 @@ defmodule Lambdex.ChurchNumber do
   defl(:mul, "n. m. f. x. n (m f) x")
   # To be honest, I still don't quite understand it, so just trust Wikipedia
   defl(:pred, "n. f. x. n (g. h. h (g f)) (u. x) (u. u)")
-  defl(:is_zero, "n. n (x. false) true")
+  defl(:is_zero, "n. n (x. false!) true!")
 
   def to_elixir(n), do: n.(&(&1 + 1)).(0)
 
-  def from_elixir(0), do: zero!()
+  def from_elixir(0), do: zero()
 
   def from_elixir(num) when is_integer(num) and num > 0 do
-    Enum.reduce(1..num, zero!(), fn _, acc -> succ!().(acc) end)
+    Enum.reduce(1..num, zero(), fn _, acc -> succ().(acc) end)
   end
 end

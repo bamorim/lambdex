@@ -42,7 +42,7 @@ defmodule Lambdex.Lang.CodeGen do
     end
   end
 
-  def arg_ref(key), do: {:"lambdex_arg_#{key}", [], Elixir}
+  def arg_ref(key), do: {:"#{key}", [], Elixir}
   def func_ref(nil), do: func_ref("nil")
-  def func_ref(key), do: {:"#{key}!", [], []}
+  def func_ref(key), do: {:"#{key}", [], []}
 end
