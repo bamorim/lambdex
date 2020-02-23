@@ -15,7 +15,7 @@ defmodule Lambdex.ChurchFactorial do
     n.
       ifte
       (is_zero n)
-      (b. (f. x. f x))
-      (b. (mul n (fact_recursive (pred n))))
+      (_. (f. x. f x))
+      (_. (mul n (fact_recursive (pred n))))
   """)
 end

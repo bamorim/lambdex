@@ -3,8 +3,8 @@ defmodule Lambdex.Bool do
   Bool encoding (which is the same in either scott encoding and church encoding)
   """
   import Lambdex.Lang
-  defl(:true!, "t. f. t")
-  defl(:false!, "t. f. f")
+  defl(:true!, "t. _. t")
+  defl(:false!, "_. f. f")
   defl(:not, "b. b true! false!")
   defl(:and, "a. b. a b false!")
   # Lazy IF which expects a function instead of a value, since Elixir is eagerly evaluated

@@ -2,8 +2,8 @@ defmodule Lambdex.ScottList do
   import Lambdex.Lang
   import Lambdex.Recursion, only: [z: 0]
 
-  defl(:empty, "empty. cons. empty")
-  defl(:cons, "h. t. empty. cons. cons h t")
+  defl(:empty, "empty. _cons. empty")
+  defl(:cons, "h. t. _empty. cons. cons h t")
 
   defl(:map_h, """
     map. fun. l.

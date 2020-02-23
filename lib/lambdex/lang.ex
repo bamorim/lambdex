@@ -1,10 +1,25 @@
 defmodule Lambdex.Lang do
-  defmacro defl(name, expr) do
-    ast = expr |> tokenize() |> parse()
-    Lambdex.Lang.CodeGen.module_func(name, ast)
+  alias Lambdex.Lang.{
+    CodeGen,
+    Parser,
+    Tokenizer
+  }
+
+  defmacro mid(x) do
+    IO.inspect(x)
+    x
   end
 
-  defdelegate tokenize(code), to: Lambdex.Lang.Tokenizer
-  defdelegate parse(tokens), to: Lambdex.Lang.Parser
-  defdelegate compile(ast), to: Lambdex.Lang.CodeGen
+  defmacro f(expr) do
+    expr |> tokenize() |> parse() |> CodeGen.inline_func(__CALLER__)
+  end
+
+  defmacro defl(name, expr) do
+    ast = expr |> tokenize() |> parse()
+    CodeGen.module_func(name, ast)
+  end
+
+  defdelegate tokenize(code), to: Tokenizer
+  defdelegate parse(tokens), to: Parser
+  defdelegate compile(ast), to: CodeGen
 end

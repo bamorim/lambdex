@@ -3,12 +3,12 @@ defmodule Lambdex.ScottNumber do
   import Lambdex.Recursion, only: [z: 0]
   import Lambdex.Bool, only: [false!: 0, true!: 0]
 
-  defl(:zero, "succ. zero. zero")
-  defl(:succ, "n. succ. zero. succ n")
+  defl(:zero, "_succ. zero. zero")
+  defl(:succ, "n. succ. _zero. succ n")
 
   defl(:pred, "n. n (pred. pred) zero")
 
-  defl(:add_h, "add. n. m. n (p. add p (succ. zero. succ m)) m")
+  defl(:add_h, "add. n. m. n (p. add p (succ. _zero. succ m)) m")
   defl(:add, "z add_h")
 
   defl(:do_mul_h, """
@@ -28,7 +28,7 @@ defmodule Lambdex.ScottNumber do
     to_church. n.
       n
         (p. f. x. f (to_church p f x))
-        (f. x. x)
+        (_. x. x)
   """)
 
   defl(:to_church, "z to_church_h")
